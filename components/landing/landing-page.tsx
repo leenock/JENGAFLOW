@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { chapters } from "./content";
 import { ChapterScreens } from "./chapter-section";
 import { HeroSection } from "./hero-section";
+import { LandingBootLoader } from "./landing-boot";
 import {
   LandingFooter,
   isInteractiveTarget,
@@ -24,6 +25,7 @@ export function LandingPage() {
   const [activeScreen, setActiveScreen] = useState(0);
   const [leavingScreen, setLeavingScreen] = useState<number | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [booting, setBooting] = useState(true);
 
   const lockedRef = useRef(false);
   const wheelAccRef = useRef(0);
@@ -100,6 +102,10 @@ export function LandingPage() {
     if (!stage) return;
 
     const onWheel = (event: WheelEvent) => {
+      if (booting) {
+        event.preventDefault();
+        return;
+      }
       if (isInteractiveTarget(event.target)) {
         return;
       }
@@ -115,7 +121,7 @@ export function LandingPage() {
     };
 
     const onTouchStart = (event: TouchEvent) => {
-      if (isInteractiveTarget(event.target)) {
+      if (booting || isInteractiveTarget(event.target)) {
         touchYRef.current = null;
         return;
       }
@@ -123,7 +129,8 @@ export function LandingPage() {
     };
 
     const onTouchEnd = (event: TouchEvent) => {
-      if (navOpen || lockedRef.current || touchYRef.current == null) return;
+      if (booting || navOpen || lockedRef.current || touchYRef.current == null)
+        return;
       if (isInteractiveTarget(event.target)) return;
       const endY = event.changedTouches[0]?.clientY;
       if (endY == null) return;
@@ -134,7 +141,7 @@ export function LandingPage() {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (navOpen || lockedRef.current) return;
+      if (booting || navOpen || lockedRef.current) return;
       if (isInteractiveTarget(event.target)) return;
       if (
         event.key === "ArrowDown" ||
@@ -166,7 +173,7 @@ export function LandingPage() {
       stage.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [activeScreen, footerIndex, goToScreen, navOpen]);
+  }, [activeScreen, booting, footerIndex, goToScreen, navOpen]);
 
   useEffect(() => {
     const onHash = () => {
@@ -188,11 +195,13 @@ export function LandingPage() {
 
   return (
     <div className="landing-root relative h-dvh overflow-hidden bg-black text-white">
+      <LandingBootLoader onComplete={() => setBooting(false)} />
+
       <SiteHeader
         open={navOpen}
         onOpenChange={setNavOpen}
         tone={chromeTone}
-        showTopNav={showTopNav}
+        showTopNav={showTopNav && !booting}
       />
 
       <div ref={stageRef} className="landing-stage">
@@ -223,7 +232,7 @@ export function LandingPage() {
         />
       </div>
 
-      {activeScreen > 0 && activeScreen < footerIndex ? (
+      {activeScreen > 0 && activeScreen < footerIndex && !booting ? (
         <>
           {chromeTone === "light" ? (
             <Pagination
@@ -245,7 +254,7 @@ export function LandingPage() {
         </>
       ) : null}
 
-      {activeScreen === footerIndex ? (
+      {activeScreen === footerIndex && !booting ? (
         <ScrollCue
           atEnd
           tone="dark"
