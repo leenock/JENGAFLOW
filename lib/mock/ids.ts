@@ -1,0 +1,7 @@
+/** Tiny id helper for mock records — replace with DB ids later. */
+
+export function createId(prefix: string): string {
+  const rand = Math.random().toString(36).slice(2, 8);
+  const time = Date.now().toString(36);
+  return `${prefix}_${time}${rand}`;
+}
