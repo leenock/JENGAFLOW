@@ -53,7 +53,7 @@ const outcomes = [
     title: "Spend stays visible",
     body: "Materials, labour, and delivery fees roll into budget and remaining spend.",
     image:
-      "https://images.unsplash.com/photo-1531834685032-c34bf7958eed?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=900&q=80",
   },
   {
     title: "Progress stays visible",
