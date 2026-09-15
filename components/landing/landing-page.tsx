@@ -4,6 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { chapters } from "./content";
 import { ChapterScreens } from "./chapter-section";
 import { HeroSection } from "./hero-section";
+import {
+  LandingFooter,
+  isInteractiveTarget,
+} from "./landing-footer";
 import { Pagination } from "./pagination";
 import { ScrollCue } from "./scroll-cue";
 import { SiteHeader } from "./site-header";
@@ -52,7 +56,7 @@ export function LandingPage() {
     for (const chapter of chapters) {
       ids.push(chapter.id, `${chapter.id}-detail`);
     }
-    ids.push("footer");
+    ids.push("contact-us");
     return ids;
   }, []);
 
@@ -72,10 +76,8 @@ export function LandingPage() {
       wheelAccRef.current = 0;
 
       const id = screenIds[index];
-      if (id && id !== "footer") {
+      if (id) {
         window.history.replaceState(null, "", `#${id}`);
-      } else if (id === "footer") {
-        window.history.replaceState(null, "", "#footer");
       }
 
       window.setTimeout(() => {
@@ -98,6 +100,9 @@ export function LandingPage() {
     if (!stage) return;
 
     const onWheel = (event: WheelEvent) => {
+      if (isInteractiveTarget(event.target)) {
+        return;
+      }
       event.preventDefault();
       if (navOpen || lockedRef.current) return;
 
@@ -110,11 +115,16 @@ export function LandingPage() {
     };
 
     const onTouchStart = (event: TouchEvent) => {
+      if (isInteractiveTarget(event.target)) {
+        touchYRef.current = null;
+        return;
+      }
       touchYRef.current = event.touches[0]?.clientY ?? null;
     };
 
     const onTouchEnd = (event: TouchEvent) => {
       if (navOpen || lockedRef.current || touchYRef.current == null) return;
+      if (isInteractiveTarget(event.target)) return;
       const endY = event.changedTouches[0]?.clientY;
       if (endY == null) return;
       const delta = touchYRef.current - endY;
@@ -125,6 +135,7 @@ export function LandingPage() {
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (navOpen || lockedRef.current) return;
+      if (isInteractiveTarget(event.target)) return;
       if (
         event.key === "ArrowDown" ||
         event.key === "PageDown" ||
@@ -159,8 +170,9 @@ export function LandingPage() {
 
   useEffect(() => {
     const onHash = () => {
-      const id = window.location.hash.replace("#", "");
-      if (!id) return;
+      const raw = window.location.hash.replace("#", "");
+      if (!raw) return;
+      const id = raw === "footer" ? "contact-us" : raw;
       const index = screenIds.indexOf(id);
       if (index >= 0) goToScreen(index);
     };
@@ -204,37 +216,11 @@ export function LandingPage() {
           />
         ))}
 
-        <footer
-          id="footer"
-          data-screen={footerIndex}
-          data-tone="dark"
-          data-visible={isVisible(footerIndex) ? "true" : "false"}
-          data-active={activeScreen === footerIndex ? "true" : "false"}
-          className="landing-screen border-t border-black/10 bg-jf-ink px-6 py-12 text-white md:px-12"
-        >
-          <div className="mx-auto flex h-full max-w-5xl flex-col justify-center gap-8 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-lg font-semibold tracking-[0.12em] uppercase">
-                Jengaflow
-              </p>
-              <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">
-                Construction site tracking for owners and site teams — spending,
-                deliveries, and progress in one project record.
-              </p>
-            </div>
-            <div className="text-sm text-white/70">
-              <a
-                href="mailto:hello@jengaflow.com"
-                className="text-white no-underline hover:underline"
-              >
-                hello@jengaflow.com
-              </a>
-              <p className="mt-3 text-xs tracking-[0.08em] uppercase opacity-60">
-                © {new Date().getFullYear()} Jengaflow
-              </p>
-            </div>
-          </div>
-        </footer>
+        <LandingFooter
+          screenIndex={footerIndex}
+          visible={isVisible(footerIndex)}
+          active={activeScreen === footerIndex}
+        />
       </div>
 
       {activeScreen > 0 && activeScreen < footerIndex ? (

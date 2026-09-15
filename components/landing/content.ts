@@ -182,3 +182,11 @@ export const contact = {
   phone: "+254 700 000 000",
   location: "Nairobi, Kenya — serving East Africa and beyond",
 };
+
+export const footerCta = {
+  eyebrow: "Next step",
+  title: "Put your sites on one record.",
+  body: "Early access for contractors and site managers. Start a workspace, or leave a note and we’ll follow up.",
+  formTitle: "Tell us about your sites",
+  formBody: "Demos, early access, or partnership — send a short note.",
+};
