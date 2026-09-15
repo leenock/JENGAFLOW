@@ -11,6 +11,7 @@ import { subscribeMockDb } from "@/lib/mock/store";
 import { formatDate } from "@/lib/format";
 import { ProjectStatusBadge } from "@/components/app/project-status-badge";
 import { ProjectSubnav } from "@/features/projects/components/project-subnav";
+import { ProjectTabTransition } from "@/features/projects/components/project-tab-transition";
 
 export default function ProjectLayout({ children }: { children: ReactNode }) {
   const params = useParams<{ projectId: string }>();
@@ -141,7 +142,9 @@ export default function ProjectLayout({ children }: { children: ReactNode }) {
       </div>
 
       <ProjectSubnav projectId={project.id} role={user.role} />
-      <div>{children}</div>
+      <ProjectTabTransition projectId={project.id}>
+        {children}
+      </ProjectTabTransition>
     </div>
   );
 }
